@@ -1,0 +1,1351 @@
+================================================================================
+EXECUTION LOGS: Machine Learning-Based Detection of Blockchain Network Attacks
+================================================================================
+
+--- [Cell 0] (code) ---
+Source:
+  from google.colab import files
+  
+  uploaded = files.upload()
+
+Output:
+  [display] <IPython.core.display.HTML object>
+  [stdout] Saving blockchain_attack_dataset.csv to blockchain_attack_dataset.csv
+
+--- [Cell 1] (code) ---
+Source:
+  import pandas as pd
+  
+  df = pd.read_csv('blockchain_attack_dataset.csv')
+  
+  df.head()
+
+Output:
+  [result]    Unnamed: 0  Index                                     Address  FLAG  \
+  [result] 0           0      1  0x00009277775ac7d0d59eaad8fee3d10ac6c805e8     0   
+  [result] 1           1      2  0x0002b44ddb1476db43c868bd494422ee4c136fed     0   
+  [result] 2           2      3  0x0002bda54cb772d040f779e88eb453cac0daa244     0   
+  [result] 3           3      4  0x00038e6ba2fd5c09aedb96697c8d7b8fa6632e5e     0   
+  [result] 4           4      5  0x00062d1dd1afb6fb02540ddad9cdebfe568e0d89     0   
+  [result] 
+  [result]    Avg min between sent tnx  Avg min between received tnx  \
+  [result] 0                    844.26                       1093.71   
+  [result] 1                  12709.07                       2958.44   
+  [result] 2                 246194.54                       2434.02   
+  [result] 3                  10219.60                      15785.09   
+  [result] 4                     36.61                      10707.77   
+  [result] 
+  [result]    Time Diff between first and last (Mins)  Sent tnx  Received Tnx  \
+  [result] 0                                704785.63       721            89   
+  [result] 1                               1218216.73        94             8   
+  [result] 2                                516729.30         2            10   
+  [result] 3                                397555.90        25             9   
+  [result] 4                                382472.42      4598            20   
+  [result] 
+  [result]    Number of Created Contracts  ...   ERC20 min val sent   ERC20 max val sent  \
+  [result] 0                            0  ...             0.000000         1.683100e+07   
+  [result] 1                            0  ...             2.260809         2.260809e+00   
+  [result] 2                            0  ...             0.000000         0.000000e+00   
+  [result] 3                            0  ...           100.000000         9.029231e+03   
+  [result] 4                            1  ...             0.000000         4.500000e+04   
+  [result] 
+  [result]     ERC20 avg val sent   ERC20 min val sent contract  \
+  [result] 0        271779.920000                           0.0   
+  [result] 1             2.260809                           0.0   
+  [result] 2             0.000000                           0.0   
+  [result] 3          3804.076893                           0.0   
+  [result] 4         13726.659220                           0.0   
+  [result] 
+  [result]     ERC20 max val sent contract   ERC20 avg val sent contract  \
+  [result] 0                           0.0                           0.0   
+  [result] 1                           0.0                           0.0   
+  [result] 2                           0.0                           0.0   
+  [result] 3                           0.0                           0.0   
+  [result] 4                           0.0                           0.0   
+  [result] 
+  [result]     ERC20 uniq sent token name   ERC20 uniq rec token name  \
+  [result] 0                         39.0                        57.0   
+  [result] 1                          1.0                         7.0   
+  [result] 2                          0.0                         8.0   
+  [result] 3                          1.0                        11.0   
+  [result] 4                          6.0                        27.0   
+  [result] 
+  [result]     ERC20 most sent token type   ERC20_most_rec_token_type  
+  [result] 0                    Cofoundit                   Numeraire  
+  [result] 1               Livepeer Token              Livepeer Token  
+  [result] 2                          NaN                       XENON  
+  [result] 3                       Raiden                       XENON  
+  [result] 4                StatusNetwork                         EOS  
+  [result] 
+  [result] [5 rows x 51 columns]
+
+--- [Cell 3] (code) ---
+Source:
+  df.shape
+
+Output:
+  [result] (9841, 51)
+
+--- [Cell 4] (code) ---
+Source:
+  df.columns
+
+Output:
+  [result] Index(['Unnamed: 0', 'Index', 'Address', 'FLAG', 'Avg min between sent tnx',
+  [result]        'Avg min between received tnx',
+  [result]        'Time Diff between first and last (Mins)', 'Sent tnx', 'Received Tnx',
+  [result]        'Number of Created Contracts', 'Unique Received From Addresses',
+  [result]        'Unique Sent To Addresses', 'min value received', 'max value received ',
+  [result]        'avg val received', 'min val sent', 'max val sent', 'avg val sent',
+  [result]        'min value sent to contract', 'max val sent to contract',
+  [result]        'avg value sent to contract',
+  [result]        'total transactions (including tnx to create contract',
+  [result]        'total Ether sent', 'total ether received',
+  [result]        'total ether sent contracts', 'total ether balance',
+  [result]        ' Total ERC20 tnxs', ' ERC20 total Ether received',
+  [result]        ' ERC20 total ether sent', ' ERC20 total Ether sent contract',
+  [result]        ' ERC20 uniq sent addr', ' ERC20 uniq rec addr',
+  [result]        ' ERC20 uniq sent addr.1', ' ERC20 uniq rec contract addr',
+  [result]        ' ERC20 avg time between sent tnx', ' ERC20 avg time between rec tnx',
+  [result]        ' ERC20 avg time between rec 2 tnx',
+  [result]        ' ERC20 avg time between contract tnx', ' ERC20 min val rec',
+  [result]        ' ERC20 max val rec', ' ERC20 avg val rec', ' ERC20 min val sent',
+  [result]        ' ERC20 max val sent', ' ERC20 avg val sent',
+  [result]        ' ERC20 min val sent contract', ' ERC20 max val sent contract',
+  [result]        ' ERC20 avg val sent contract', ' ERC20 uniq sent token name',
+  [result]        ' ERC20 uniq rec token name', ' ERC20 most sent token type',
+  [result]        ' ERC20_most_rec_token_type'],
+  [result]       dtype='object')
+
+--- [Cell 5] (code) ---
+Source:
+  df.info()
+
+Output:
+  [stdout] <class 'pandas.core.frame.DataFrame'>
+  [stdout] RangeIndex: 9841 entries, 0 to 9840
+  [stdout] Data columns (total 51 columns):
+  [stdout]  #   Column                                                Non-Null Count  Dtype  
+  [stdout] ---  ------                                                --------------  -----  
+  [stdout]  0   Unnamed: 0                                            9841 non-null   int64  
+  [stdout]  1   Index                                                 9841 non-null   int64  
+  [stdout]  2   Address                                               9841 non-null   object 
+  [stdout]  3   FLAG                                                  9841 non-null   int64  
+  [stdout]  4   Avg min between sent tnx                              9841 non-null   float64
+  [stdout]  5   Avg min between received tnx                          9841 non-null   float64
+  [stdout]  6   Time Diff between first and last (Mins)               9841 non-null   float64
+  [stdout]  7   Sent tnx                                              9841 non-null   int64  
+  [stdout]  8   Received Tnx                                          9841 non-null   int64  
+  [stdout]  9   Number of Created Contracts                           9841 non-null   int64  
+  [stdout]  10  Unique Received From Addresses                        9841 non-null   int64  
+  [stdout]  11  Unique Sent To Addresses                              9841 non-null   int64  
+  [stdout]  12  min value received                                    9841 non-null   float64
+  [stdout]  13  max value received                                    9841 non-null   float64
+  [stdout]  14  avg val received                                      9841 non-null   float64
+  [stdout]  15  min val sent                                          9841 non-null   float64
+  [stdout]  16  max val sent                                          9841 non-null   float64
+  [stdout]  17  avg val sent                                          9841 non-null   float64
+  [stdout]  18  min value sent to contract                            9841 non-null   float64
+  [stdout]  19  max val sent to contract                              9841 non-null   float64
+  [stdout]  20  avg value sent to contract                            9841 non-null   float64
+  [stdout]  21  total transactions (including tnx to create contract  9841 non-null   int64  
+  [stdout]  22  total Ether sent                                      9841 non-null   float64
+  [stdout]  23  total ether received                                  9841 non-null   float64
+  [stdout]  24  total ether sent contracts                            9841 non-null   float64
+  [stdout]  25  total ether balance                                   9841 non-null   float64
+  [stdout]  26   Total ERC20 tnxs                                     9012 non-null   float64
+  [stdout]  27   ERC20 total Ether received                           9012 non-null   float64
+  [stdout]  28   ERC20 total ether sent                               9012 non-null   float64
+  [stdout]  29   ERC20 total Ether sent contract                      9012 non-null   float64
+  [stdout]  30   ERC20 uniq sent addr                                 9012 non-null   float64
+  [stdout]  31   ERC20 uniq rec addr                                  9012 non-null   float64
+  [stdout]  32   ERC20 uniq sent addr.1                               9012 non-null   float64
+  [stdout]  33   ERC20 uniq rec contract addr                         9012 non-null   float64
+  [stdout]  34   ERC20 avg time between sent tnx                      9012 non-null   float64
+  [stdout]  35   ERC20 avg time between rec tnx                       9012 non-null   float64
+  [stdout]  36   ERC20 avg time between rec 2 tnx                     9012 non-null   float64
+  [stdout]  37   ERC20 avg time between contract tnx                  9012 non-null   float64
+  [stdout]  38   ERC20 min val rec                                    9012 non-null   float64
+  [stdout]  39   ERC20 max val rec                                    9012 non-null   float64
+  [stdout]  40   ERC20 avg val rec                                    9012 non-null   float64
+  [stdout]  41   ERC20 min val sent                                   9012 non-null   float64
+  [stdout]  42   ERC20 max val sent                                   9012 non-null   float64
+  [stdout]  43   ERC20 avg val sent                                   9012 non-null   float64
+  [stdout]  44   ERC20 min val sent contract                          9012 non-null   float64
+  [stdout]  45   ERC20 max val sent contract                          9012 non-null   float64
+  [stdout]  46   ERC20 avg val sent contract                          9012 non-null   float64
+  [stdout]  47   ERC20 uniq sent token name                           9012 non-null   float64
+  [stdout]  48   ERC20 uniq rec token name                            9012 non-null   float64
+  [stdout]  49   ERC20 most sent token type                           7144 non-null   object 
+  [stdout]  50   ERC20_most_rec_token_type                            8970 non-null   object 
+  [stdout] dtypes: float64(39), int64(9), object(3)
+  [stdout] memory usage: 3.8+ MB
+
+--- [Cell 6] (code) ---
+Source:
+  df.isnull().sum().sort_values(ascending=False)
+
+Output:
+  [result]  ERC20 most sent token type                             2697
+  [result]  ERC20_most_rec_token_type                               871
+  [result]  ERC20 avg val sent                                      829
+  [result]  ERC20 total Ether received                              829
+  [result]  ERC20 total ether sent                                  829
+  [result]  ERC20 avg time between rec tnx                          829
+  [result]  ERC20 avg time between rec 2 tnx                        829
+  [result]  ERC20 max val rec                                       829
+  [result]  ERC20 avg val rec                                       829
+  [result]  ERC20 avg time between contract tnx                     829
+  [result]  ERC20 avg time between sent tnx                         829
+  [result]  ERC20 uniq rec addr                                     829
+  [result]  ERC20 uniq sent addr.1                                  829
+  [result]  ERC20 total Ether sent contract                         829
+  [result]  ERC20 uniq sent addr                                    829
+  [result]  ERC20 uniq rec contract addr                            829
+  [result]  Total ERC20 tnxs                                        829
+  [result]  ERC20 min val sent                                      829
+  [result]  ERC20 max val sent                                      829
+  [result]  ERC20 uniq sent token name                              829
+  [result]  ERC20 max val sent contract                             829
+  [result]  ERC20 uniq rec token name                               829
+  [result]  ERC20 min val sent contract                             829
+  [result]  ERC20 avg val sent contract                             829
+  [result]  ERC20 min val rec                                       829
+  [result] max val sent                                               0
+  [result] avg val sent                                               0
+  [result] min value sent to contract                                 0
+  [result] Number of Created Contracts                                0
+  [result] Received Tnx                                               0
+  [result] Sent tnx                                                   0
+  [result] Time Diff between first and last (Mins)                    0
+  [result] Avg min between received tnx                               0
+  [result] Avg min between sent tnx                                   0
+  [result] FLAG                                                       0
+  [result] Address                                                    0
+  [result] Index                                                      0
+  [result] Unnamed: 0                                                 0
+  [result] min val sent                                               0
+  [result] avg val received                                           0
+  [result] max value received                                         0
+  [result] min value received                                         0
+  [result] Unique Sent To Addresses                                   0
+  [result] Unique Received From Addresses                             0
+  [result] total Ether sent                                           0
+  [result] total transactions (including tnx to create contract       0
+  [result] max val sent to contract                                   0
+  [result] total ether sent contracts                                 0
+  [result] total ether received                                       0
+  [result] total ether balance                                        0
+  [result] avg value sent to contract                                 0
+  [result] dtype: int64
+
+--- [Cell 7] (code) ---
+Source:
+  df.duplicated().sum()
+
+Output:
+  [result] np.int64(0)
+
+--- [Cell 8] (code) ---
+Source:
+  df.drop_duplicates(inplace=True)
+
+Output: (No output or in-place execution)
+
+--- [Cell 9] (code) ---
+Source:
+  df.drop(['Unnamed: 0','Index','Address'],
+          axis=1,
+          inplace=True)
+
+Output: (No output or in-place execution)
+
+--- [Cell 10] (code) ---
+Source:
+  df.shape
+
+Output:
+  [result] (9841, 48)
+
+--- [Cell 11] (code) ---
+Source:
+  df['FLAG'].value_counts()
+
+Output:
+  [result] FLAG
+  [result] 0    7662
+  [result] 1    2179
+  [result] Name: count, dtype: int64
+
+--- [Cell 12] (code) ---
+Source:
+  df['FLAG'].value_counts(normalize=True)*100
+
+Output:
+  [result] FLAG
+  [result] 0    77.857941
+  [result] 1    22.142059
+  [result] Name: proportion, dtype: float64
+
+--- [Cell 13] (code) ---
+Source:
+  df.dtypes
+
+Output:
+  [result] FLAG                                                      int64
+  [result] Avg min between sent tnx                                float64
+  [result] Avg min between received tnx                            float64
+  [result] Time Diff between first and last (Mins)                 float64
+  [result] Sent tnx                                                  int64
+  [result] Received Tnx                                              int64
+  [result] Number of Created Contracts                               int64
+  [result] Unique Received From Addresses                            int64
+  [result] Unique Sent To Addresses                                  int64
+  [result] min value received                                      float64
+  [result] max value received                                      float64
+  [result] avg val received                                        float64
+  [result] min val sent                                            float64
+  [result] max val sent                                            float64
+  [result] avg val sent                                            float64
+  [result] min value sent to contract                              float64
+  [result] max val sent to contract                                float64
+  [result] avg value sent to contract                              float64
+  [result] total transactions (including tnx to create contract      int64
+  [result] total Ether sent                                        float64
+  [result] total ether received                                    float64
+  [result] total ether sent contracts                              float64
+  [result] total ether balance                                     float64
+  [result]  Total ERC20 tnxs                                       float64
+  [result]  ERC20 total Ether received                             float64
+  [result]  ERC20 total ether sent                                 float64
+  [result]  ERC20 total Ether sent contract                        float64
+  [result]  ERC20 uniq sent addr                                   float64
+  [result]  ERC20 uniq rec addr                                    float64
+  [result]  ERC20 uniq sent addr.1                                 float64
+  [result]  ERC20 uniq rec contract addr                           float64
+  [result]  ERC20 avg time between sent tnx                        float64
+  [result]  ERC20 avg time between rec tnx                         float64
+  [result]  ERC20 avg time between rec 2 tnx                       float64
+  [result]  ERC20 avg time between contract tnx                    float64
+  [result]  ERC20 min val rec                                      float64
+  [result]  ERC20 max val rec                                      float64
+  [result]  ERC20 avg val rec                                      float64
+  [result]  ERC20 min val sent                                     float64
+  [result]  ERC20 max val sent                                     float64
+  [result]  ERC20 avg val sent                                     float64
+  [result]  ERC20 min val sent contract                            float64
+  [result]  ERC20 max val sent contract                            float64
+  [result]  ERC20 avg val sent contract                            float64
+  [result]  ERC20 uniq sent token name                             float64
+  [result]  ERC20 uniq rec token name                              float64
+  [result]  ERC20 most sent token type                              object
+  [result]  ERC20_most_rec_token_type                               object
+  [result] dtype: object
+
+--- [Cell 14] (code) ---
+Source:
+  df.select_dtypes(include=['object']).columns
+
+Output:
+  [result] Index([' ERC20 most sent token type', ' ERC20_most_rec_token_type'], dtype='object')
+
+--- [Cell 15] (code) ---
+Source:
+  df.describe()
+
+Output:
+  [result]               FLAG  Avg min between sent tnx  Avg min between received tnx  \
+  [result] count  9841.000000               9841.000000                   9841.000000   
+  [result] mean      0.221421               5086.878721                   8004.851184   
+  [result] std       0.415224              21486.549974                  23081.714801   
+  [result] min       0.000000                  0.000000                      0.000000   
+  [result] 25%       0.000000                  0.000000                      0.000000   
+  [result] 50%       0.000000                 17.340000                    509.770000   
+  [result] 75%       0.000000                565.470000                   5480.390000   
+  [result] max       1.000000             430287.670000                 482175.490000   
+  [result] 
+  [result]        Time Diff between first and last (Mins)      Sent tnx  Received Tnx  \
+  [result] count                             9.841000e+03   9841.000000   9841.000000   
+  [result] mean                              2.183333e+05    115.931714    163.700945   
+  [result] std                               3.229379e+05    757.226361    940.836550   
+  [result] min                               0.000000e+00      0.000000      0.000000   
+  [result] 25%                               3.169300e+02      1.000000      1.000000   
+  [result] 50%                               4.663703e+04      3.000000      4.000000   
+  [result] 75%                               3.040710e+05     11.000000     27.000000   
+  [result] max                               1.954861e+06  10000.000000  10000.000000   
+  [result] 
+  [result]        Number of Created Contracts  Unique Received From Addresses  \
+  [result] count                  9841.000000                     9841.000000   
+  [result] mean                      3.729702                       30.360939   
+  [result] std                     141.445583                      298.621112   
+  [result] min                       0.000000                        0.000000   
+  [result] 25%                       0.000000                        1.000000   
+  [result] 50%                       0.000000                        2.000000   
+  [result] 75%                       0.000000                        5.000000   
+  [result] max                    9995.000000                     9999.000000   
+  [result] 
+  [result]        Unique Sent To Addresses  min value received  ...   ERC20 max val rec  \
+  [result] count               9841.000000         9841.000000  ...        9.012000e+03   
+  [result] mean                  25.840159           43.845153  ...        1.252524e+08   
+  [result] std                  263.820410          325.929139  ...        1.053741e+10   
+  [result] min                    0.000000            0.000000  ...        0.000000e+00   
+  [result] 25%                    1.000000            0.001000  ...        0.000000e+00   
+  [result] 50%                    2.000000            0.095856  ...        0.000000e+00   
+  [result] 75%                    3.000000            2.000000  ...        9.900000e+01   
+  [result] max                 9287.000000        10000.000000  ...        1.000000e+12   
+  [result] 
+  [result]         ERC20 avg val rec   ERC20 min val sent   ERC20 max val sent  \
+  [result] count        9.012000e+03         9.012000e+03         9.012000e+03   
+  [result] mean         4.346203e+06         1.174126e+04         1.303594e+07   
+  [result] std          2.141192e+08         1.053567e+06         1.179905e+09   
+  [result] min          0.000000e+00         0.000000e+00         0.000000e+00   
+  [result] 25%          0.000000e+00         0.000000e+00         0.000000e+00   
+  [result] 50%          0.000000e+00         0.000000e+00         0.000000e+00   
+  [result] 75%          2.946467e+01         0.000000e+00         0.000000e+00   
+  [result] max          1.724181e+10         1.000000e+08         1.120000e+11   
+  [result] 
+  [result]         ERC20 avg val sent   ERC20 min val sent contract  \
+  [result] count         9.012000e+03                        9012.0   
+  [result] mean          6.318389e+06                           0.0   
+  [result] std           5.914764e+08                           0.0   
+  [result] min           0.000000e+00                           0.0   
+  [result] 25%           0.000000e+00                           0.0   
+  [result] 50%           0.000000e+00                           0.0   
+  [result] 75%           0.000000e+00                           0.0   
+  [result] max           5.614756e+10                           0.0   
+  [result] 
+  [result]         ERC20 max val sent contract   ERC20 avg val sent contract  \
+  [result] count                        9012.0                        9012.0   
+  [result] mean                            0.0                           0.0   
+  [result] std                             0.0                           0.0   
+  [result] min                             0.0                           0.0   
+  [result] 25%                             0.0                           0.0   
+  [result] 50%                             0.0                           0.0   
+  [result] 75%                             0.0                           0.0   
+  [result] max                             0.0                           0.0   
+  [result] 
+  [result]         ERC20 uniq sent token name   ERC20 uniq rec token name  
+  [result] count                  9012.000000                 9012.000000  
+  [result] mean                      1.384931                    4.826676  
+  [result] std                       6.735121                   16.678607  
+  [result] min                       0.000000                    0.000000  
+  [result] 25%                       0.000000                    0.000000  
+  [result] 50%                       0.000000                    1.000000  
+  [result] 75%                       0.000000                    2.000000  
+  [result] max                     213.000000                  737.000000  
+  [result] 
+  [result] [8 rows x 46 columns]
+
+--- [Cell 16] (code) ---
+Source:
+  import matplotlib.pyplot as plt
+  import seaborn as sns
+  
+  plt.figure(figsize=(6,4))
+  
+  sns.countplot(x='FLAG', data=df)
+  
+  plt.title('Fraud vs Legitimate Addresses')
+  plt.xlabel('FLAG')
+  plt.ylabel('Count')
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 600x400 with 1 Axes>
+
+--- [Cell 17] (code) ---
+Source:
+  flag_counts = df['FLAG'].value_counts()
+  
+  plt.figure(figsize=(6,6))
+  
+  plt.pie(
+      flag_counts,
+      labels=['Legitimate','Fraud'],
+      autopct='%1.1f%%'
+  )
+  
+  plt.title('Percentage Distribution of Classes')
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 600x600 with 1 Axes>
+
+--- [Cell 18] (code) ---
+Source:
+  plt.figure(figsize=(8,5))
+  
+  sns.boxplot(x='FLAG',
+              y='Sent tnx',
+              data=df)
+  
+  plt.title('Sent Transactions vs Fraud Status')
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 800x500 with 1 Axes>
+
+--- [Cell 19] (code) ---
+Source:
+  plt.figure(figsize=(8,5))
+  
+  sns.boxplot(x='FLAG',
+              y='Received Tnx',
+              data=df)
+  
+  plt.title('Received Transactions vs Fraud Status')
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 800x500 with 1 Axes>
+
+--- [Cell 20] (code) ---
+Source:
+  plt.figure(figsize=(8,5))
+  
+  sns.boxplot(x='FLAG',
+              y='total ether balance',
+              data=df)
+  
+  plt.title('Ether Balance Distribution')
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 800x500 with 1 Axes>
+
+--- [Cell 21] (code) ---
+Source:
+  numeric_df = df.select_dtypes(include=['int64','float64'])
+
+Output: (No output or in-place execution)
+
+--- [Cell 22] (code) ---
+Source:
+  plt.figure(figsize=(15,10))
+  
+  corr = numeric_df.corr()
+  
+  sns.heatmap(
+      corr,
+      cmap='coolwarm',
+      center=0
+  )
+  
+  plt.title('Correlation Heatmap')
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 1500x1000 with 2 Axes>
+
+--- [Cell 23] (code) ---
+Source:
+  corr_with_flag = numeric_df.corr()['FLAG'].sort_values(ascending=False)
+  
+  print(corr_with_flag.head(15))
+
+Output:
+  [stdout] FLAG                                1.000000
+  [stdout]  ERC20 min val sent                 0.025364
+  [stdout]  ERC20 avg val sent                 0.025044
+  [stdout]  ERC20 max val sent                 0.025038
+  [stdout]  ERC20 total ether sent             0.024762
+  [stdout]  ERC20 total Ether sent contract    0.013514
+  [stdout]  ERC20 min val rec                  0.011163
+  [stdout]  ERC20 uniq sent token name         0.009249
+  [stdout]  ERC20 avg val rec                  0.007881
+  [stdout] min val sent                        0.006626
+  [stdout]  ERC20 uniq sent addr.1            -0.003047
+  [stdout] total ether balance                -0.003229
+  [stdout]  ERC20 max val rec                 -0.004313
+  [stdout]  ERC20 total Ether received        -0.004475
+  [stdout] min value sent to contract         -0.007213
+  [stdout] Name: FLAG, dtype: float64
+
+--- [Cell 24] (code) ---
+Source:
+  plt.figure(figsize=(12,6))
+  
+  sns.heatmap(df.isnull(),
+              cbar=False)
+  
+  plt.title('Missing Values Heatmap')
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 1200x600 with 1 Axes>
+
+--- [Cell 25] (code) ---
+Source:
+  df.isnull().sum().sum()
+
+Output:
+  [result] np.int64(22635)
+
+--- [Cell 26] (code) ---
+Source:
+  num_cols = df.select_dtypes(include=['int64','float64']).columns
+  
+  cat_cols = df.select_dtypes(include=['object']).columns
+  
+  print("Numerical Columns:", len(num_cols))
+  print("Categorical Columns:", len(cat_cols))
+  
+  cat_cols
+
+Output:
+  [stdout] Numerical Columns: 46
+  [stdout] Categorical Columns: 2
+  [result] Index([' ERC20 most sent token type', ' ERC20_most_rec_token_type'], dtype='object')
+
+--- [Cell 27] (code) ---
+Source:
+  df[num_cols] = df[num_cols].fillna(0)
+
+Output: (No output or in-place execution)
+
+--- [Cell 28] (code) ---
+Source:
+  df[num_cols].isnull().sum().sum()
+
+Output:
+  [result] np.int64(0)
+
+--- [Cell 29] (code) ---
+Source:
+  df[cat_cols] = df[cat_cols].fillna('Unknown')
+
+Output: (No output or in-place execution)
+
+--- [Cell 30] (code) ---
+Source:
+  df[cat_cols].isnull().sum()
+
+Output:
+  [result] ERC20 most sent token type    0
+  [result] ERC20_most_rec_token_type     0
+  [result] dtype: int64
+
+--- [Cell 31] (code) ---
+Source:
+  from sklearn.preprocessing import LabelEncoder
+  
+  le1 = LabelEncoder()
+  le2 = LabelEncoder()
+  
+  df[' ERC20 most sent token type'] = le1.fit_transform(
+      df[' ERC20 most sent token type']
+  )
+  
+  df[' ERC20_most_rec_token_type'] = le2.fit_transform(
+      df[' ERC20_most_rec_token_type']
+  )
+
+Output: (No output or in-place execution)
+
+--- [Cell 32] (code) ---
+Source:
+  df.head()
+
+Output:
+  [result]    FLAG  Avg min between sent tnx  Avg min between received tnx  \
+  [result] 0     0                    844.26                       1093.71   
+  [result] 1     0                  12709.07                       2958.44   
+  [result] 2     0                 246194.54                       2434.02   
+  [result] 3     0                  10219.60                      15785.09   
+  [result] 4     0                     36.61                      10707.77   
+  [result] 
+  [result]    Time Diff between first and last (Mins)  Sent tnx  Received Tnx  \
+  [result] 0                                704785.63       721            89   
+  [result] 1                               1218216.73        94             8   
+  [result] 2                                516729.30         2            10   
+  [result] 3                                397555.90        25             9   
+  [result] 4                                382472.42      4598            20   
+  [result] 
+  [result]    Number of Created Contracts  Unique Received From Addresses  \
+  [result] 0                            0                              40   
+  [result] 1                            0                               5   
+  [result] 2                            0                              10   
+  [result] 3                            0                               7   
+  [result] 4                            1                               7   
+  [result] 
+  [result]    Unique Sent To Addresses  min value received  ...   ERC20 min val sent  \
+  [result] 0                       118            0.000000  ...             0.000000   
+  [result] 1                        14            0.000000  ...             2.260809   
+  [result] 2                         2            0.113119  ...             0.000000   
+  [result] 3                        13            0.000000  ...           100.000000   
+  [result] 4                        19            0.000000  ...             0.000000   
+  [result] 
+  [result]     ERC20 max val sent   ERC20 avg val sent   ERC20 min val sent contract  \
+  [result] 0         1.683100e+07        271779.920000                           0.0   
+  [result] 1         2.260809e+00             2.260809                           0.0   
+  [result] 2         0.000000e+00             0.000000                           0.0   
+  [result] 3         9.029231e+03          3804.076893                           0.0   
+  [result] 4         4.500000e+04         13726.659220                           0.0   
+  [result] 
+  [result]     ERC20 max val sent contract   ERC20 avg val sent contract  \
+  [result] 0                           0.0                           0.0   
+  [result] 1                           0.0                           0.0   
+  [result] 2                           0.0                           0.0   
+  [result] 3                           0.0                           0.0   
+  [result] 4                           0.0                           0.0   
+  [result] 
+  [result]     ERC20 uniq sent token name   ERC20 uniq rec token name  \
+  [result] 0                         39.0                        57.0   
+  [result] 1                          1.0                         7.0   
+  [result] 2                          0.0                         8.0   
+  [result] 3                          1.0                        11.0   
+  [result] 4                          6.0                        27.0   
+  [result] 
+  [result]     ERC20 most sent token type   ERC20_most_rec_token_type  
+  [result] 0                           63                         299  
+  [result] 1                          154                         257  
+  [result] 2                          270                         436  
+  [result] 3                          216                         436  
+  [result] 4                          237                         154  
+  [result] 
+  [result] [5 rows x 48 columns]
+
+--- [Cell 33] (code) ---
+Source:
+  df.isnull().sum().sum()
+
+Output:
+  [result] np.int64(0)
+
+--- [Cell 34] (code) ---
+Source:
+  X = df.drop('FLAG', axis=1)
+  
+  y = df['FLAG']
+
+Output: (No output or in-place execution)
+
+--- [Cell 35] (code) ---
+Source:
+  print(X.shape)
+  print(y.shape)
+
+Output:
+  [stdout] (9841, 47)
+  [stdout] (9841,)
+
+--- [Cell 36] (code) ---
+Source:
+  from sklearn.model_selection import train_test_split
+  
+  X_train, X_test, y_train, y_test = train_test_split(
+      X,
+      y,
+      test_size=0.20,
+      random_state=42,
+      stratify=y
+  )
+
+Output: (No output or in-place execution)
+
+--- [Cell 37] (code) ---
+Source:
+  print(X_train.shape)
+  print(X_test.shape)
+
+Output:
+  [stdout] (7872, 47)
+  [stdout] (1969, 47)
+
+--- [Cell 38] (code) ---
+Source:
+  from sklearn.preprocessing import StandardScaler
+  
+  scaler = StandardScaler()
+  
+  X_train_scaled = scaler.fit_transform(X_train)
+  
+  X_test_scaled = scaler.transform(X_test)
+
+Output: (No output or in-place execution)
+
+--- [Cell 39] (code) ---
+Source:
+  X_train_scaled.shape
+
+Output:
+  [result] (7872, 47)
+
+--- [Cell 40] (code) ---
+Source:
+  from sklearn.metrics import (
+      accuracy_score,
+      precision_score,
+      recall_score,
+      f1_score,
+      confusion_matrix,
+      classification_report
+  )
+
+Output: (No output or in-place execution)
+
+--- [Cell 41] (code) ---
+Source:
+  from sklearn.ensemble import RandomForestClassifier
+  
+  rf = RandomForestClassifier(
+      n_estimators=100,
+      random_state=42
+  )
+  
+  rf.fit(X_train, y_train)
+  
+  rf_pred = rf.predict(X_test)
+
+Output: (No output or in-place execution)
+
+--- [Cell 42] (code) ---
+Source:
+  rf_acc = accuracy_score(y_test, rf_pred)
+  
+  rf_precision = precision_score(y_test, rf_pred)
+  
+  rf_recall = recall_score(y_test, rf_pred)
+  
+  rf_f1 = f1_score(y_test, rf_pred)
+  
+  print("Accuracy:", rf_acc)
+  print("Precision:", rf_precision)
+  print("Recall:", rf_recall)
+  print("F1 Score:", rf_f1)
+
+Output:
+  [stdout] Accuracy: 0.9908583037074657
+  [stdout] Precision: 1.0
+  [stdout] Recall: 0.9587155963302753
+  [stdout] F1 Score: 0.9789227166276346
+
+--- [Cell 43] (code) ---
+Source:
+  import seaborn as sns
+  import matplotlib.pyplot as plt
+  
+  cm = confusion_matrix(y_test, rf_pred)
+  
+  plt.figure(figsize=(6,4))
+  
+  sns.heatmap(
+      cm,
+      annot=True,
+      fmt='d',
+      cmap='Blues'
+  )
+  
+  plt.title("Random Forest Confusion Matrix")
+  plt.xlabel("Predicted")
+  plt.ylabel("Actual")
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 600x400 with 2 Axes>
+
+--- [Cell 44] (code) ---
+Source:
+  from sklearn.svm import SVC
+  
+  svm = SVC(
+      kernel='rbf',
+      random_state=42
+  )
+  
+  svm.fit(X_train_scaled, y_train)
+  
+  svm_pred = svm.predict(X_test_scaled)
+
+Output: (No output or in-place execution)
+
+--- [Cell 45] (code) ---
+Source:
+  svm_acc = accuracy_score(y_test, svm_pred)
+  
+  svm_precision = precision_score(y_test, svm_pred)
+  
+  svm_recall = recall_score(y_test, svm_pred)
+  
+  svm_f1 = f1_score(y_test, svm_pred)
+  
+  print("Accuracy:", svm_acc)
+  print("Precision:", svm_precision)
+  print("Recall:", svm_recall)
+  print("F1 Score:", svm_f1)
+
+Output:
+  [stdout] Accuracy: 0.9558151345860844
+  [stdout] Precision: 0.8993135011441648
+  [stdout] Recall: 0.9013761467889908
+  [stdout] F1 Score: 0.9003436426116839
+
+--- [Cell 46] (code) ---
+Source:
+  cm = confusion_matrix(y_test, svm_pred)
+  
+  plt.figure(figsize=(6,4))
+  
+  sns.heatmap(
+      cm,
+      annot=True,
+      fmt='d',
+      cmap='Greens'
+  )
+  
+  plt.title("SVM Confusion Matrix")
+  plt.xlabel("Predicted")
+  plt.ylabel("Actual")
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 600x400 with 2 Axes>
+
+--- [Cell 47] (code) ---
+Source:
+  !pip install xgboost
+
+Output:
+  [stdout] Requirement already satisfied: xgboost in /usr/local/lib/python3.13/dist-packages (3.4.1)
+  [stdout] Requirement already satisfied: numpy in /usr/local/lib/python3.13/dist-packages (from xgboost) (2.4.6)
+  [stdout] Requirement already satisfied: scipy in /usr/local/lib/python3.13/dist-packages (from xgboost) (1.16.3)
+  [stdout] Requirement already satisfied: nvidia-nccl-cu13 in /usr/local/lib/python3.13/dist-packages (from xgboost) (2.32.3)
+
+--- [Cell 48] (code) ---
+Source:
+  from xgboost import XGBClassifier
+  
+  xgb = XGBClassifier(
+      random_state=42,
+      eval_metric='logloss'
+  )
+  
+  xgb.fit(X_train, y_train)
+  
+  xgb_pred = xgb.predict(X_test)
+
+Output: (No output or in-place execution)
+
+--- [Cell 49] (code) ---
+Source:
+  xgb_acc = accuracy_score(y_test, xgb_pred)
+  
+  xgb_precision = precision_score(y_test, xgb_pred)
+  
+  xgb_recall = recall_score(y_test, xgb_pred)
+  
+  xgb_f1 = f1_score(y_test, xgb_pred)
+  
+  print("Accuracy:", xgb_acc)
+  print("Precision:", xgb_precision)
+  print("Recall:", xgb_recall)
+  print("F1 Score:", xgb_f1)
+
+Output:
+  [stdout] Accuracy: 0.9918740477399696
+  [stdout] Precision: 0.9929577464788732
+  [stdout] Recall: 0.9701834862385321
+  [stdout] F1 Score: 0.9814385150812065
+
+--- [Cell 50] (code) ---
+Source:
+  cm = confusion_matrix(y_test, xgb_pred)
+  
+  plt.figure(figsize=(6,4))
+  
+  sns.heatmap(
+      cm,
+      annot=True,
+      fmt='d',
+      cmap='Reds'
+  )
+  
+  plt.title("XGBoost Confusion Matrix")
+  plt.xlabel("Predicted")
+  plt.ylabel("Actual")
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 600x400 with 2 Axes>
+
+--- [Cell 51] (code) ---
+Source:
+  import pandas as pd
+  
+  results = pd.DataFrame({
+      'Model': ['Random Forest', 'SVM', 'XGBoost'],
+      'Accuracy': [rf_acc, svm_acc, xgb_acc],
+      'Precision': [rf_precision, svm_precision, xgb_precision],
+      'Recall': [rf_recall, svm_recall, xgb_recall],
+      'F1 Score': [rf_f1, svm_f1, xgb_f1]
+  })
+  
+  results
+
+Output:
+  [result]            Model  Accuracy  Precision    Recall  F1 Score
+  [result] 0  Random Forest  0.990858   1.000000  0.958716  0.978923
+  [result] 1            SVM  0.955815   0.899314  0.901376  0.900344
+  [result] 2        XGBoost  0.991874   0.992958  0.970183  0.981439
+
+--- [Cell 52] (code) ---
+Source:
+  results.set_index('Model')[['Accuracy','Precision','Recall','F1 Score']].plot(
+      kind='bar',
+      figsize=(10,6)
+  )
+  
+  plt.title("Model Performance Comparison")
+  
+  plt.ylabel("Score")
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 1000x600 with 1 Axes>
+
+--- [Cell 53] (code) ---
+Source:
+  fraud_probability = xgb.predict_proba(X_test)
+  
+  fraud_probability[:5]
+
+Output:
+  [result] array([[1.9770861e-04, 9.9980229e-01],
+  [result]        [9.9998003e-01, 1.9992769e-05],
+  [result]        [9.9990386e-01, 9.6155949e-05],
+  [result]        [9.9995822e-01, 4.1776628e-05],
+  [result]        [9.1520858e-01, 8.4791392e-02]], dtype=float32)
+
+--- [Cell 54] (code) ---
+Source:
+  risk_prob = fraud_probability[:,1]
+  
+  risk_prob[:10]
+
+Output:
+  [result] array([9.9980229e-01, 1.9992769e-05, 9.6155949e-05, 4.1776628e-05,
+  [result]        8.4791392e-02, 5.4839307e-05, 9.9986458e-01, 1.5959115e-05,
+  [result]        2.9953549e-02, 1.9992769e-05], dtype=float32)
+
+--- [Cell 55] (code) ---
+Source:
+  risk_score = risk_prob * 100
+
+Output: (No output or in-place execution)
+
+--- [Cell 56] (code) ---
+Source:
+  risk_score[:10]
+
+Output:
+  [result] array([9.9980232e+01, 1.9992769e-03, 9.6155945e-03, 4.1776625e-03,
+  [result]        8.4791393e+00, 5.4839309e-03, 9.9986458e+01, 1.5959115e-03,
+  [result]        2.9953549e+00, 1.9992769e-03], dtype=float32)
+
+--- [Cell 57] (code) ---
+Source:
+  import pandas as pd
+  
+  risk_category = []
+  
+  for score in risk_score:
+  
+      if score <= 30:
+          risk_category.append("Low Risk")
+  
+      elif score <= 70:
+          risk_category.append("Medium Risk")
+  
+      else:
+          risk_category.append("High Risk")
+
+Output: (No output or in-place execution)
+
+--- [Cell 58] (code) ---
+Source:
+  risk_df = pd.DataFrame({
+      'Actual_Class': y_test.values,
+      'Fraud_Probability': risk_prob,
+      'Risk_Score': risk_score,
+      'Risk_Category': risk_category
+  })
+  
+  risk_df.head()
+
+Output:
+  [result]    Actual_Class  Fraud_Probability  Risk_Score Risk_Category
+  [result] 0             1           0.999802   99.980232     High Risk
+  [result] 1             0           0.000020    0.001999      Low Risk
+  [result] 2             0           0.000096    0.009616      Low Risk
+  [result] 3             0           0.000042    0.004178      Low Risk
+  [result] 4             1           0.084791    8.479139      Low Risk
+
+--- [Cell 59] (code) ---
+Source:
+  risk_df['Risk_Category'].value_counts()
+
+Output:
+  [result] Risk_Category
+  [result] Low Risk       1537
+  [result] High Risk       422
+  [result] Medium Risk      10
+  [result] Name: count, dtype: int64
+
+--- [Cell 60] (code) ---
+Source:
+  import seaborn as sns
+  import matplotlib.pyplot as plt
+  
+  plt.figure(figsize=(7,5))
+  
+  sns.countplot(
+      x='Risk_Category',
+      data=risk_df
+  )
+  
+  plt.title("Blockchain Threat Risk Score Distribution")
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 700x500 with 1 Axes>
+
+--- [Cell 61] (code) ---
+Source:
+  risk_df['Risk_Score'].describe()
+
+Output:
+  [result] count    1969.000000
+  [result] mean       21.758507
+  [result] std        40.916233
+  [result] min         0.000502
+  [result] 25%         0.003199
+  [result] 50%         0.006597
+  [result] 75%         0.623772
+  [result] max        99.999298
+  [result] Name: Risk_Score, dtype: float64
+
+--- [Cell 62] (code) ---
+Source:
+  risk_df.sort_values(
+      by='Risk_Score',
+      ascending=False
+  ).head(20)
+
+Output:
+  [result]       Actual_Class  Fraud_Probability  Risk_Score Risk_Category
+  [result] 914              1           0.999993   99.999298     High Risk
+  [result] 1904             1           0.999992   99.999168     High Risk
+  [result] 1698             1           0.999991   99.999115     High Risk
+  [result] 548              1           0.999991   99.999115     High Risk
+  [result] 1128             1           0.999991   99.999062     High Risk
+  [result] 638              1           0.999990   99.999031     High Risk
+  [result] 1415             1           0.999990   99.999023     High Risk
+  [result] 961              1           0.999990   99.999008     High Risk
+  [result] 882              1           0.999989   99.998924     High Risk
+  [result] 399              1           0.999989   99.998856     High Risk
+  [result] 571              1           0.999988   99.998833     High Risk
+  [result] 315              1           0.999988   99.998795     High Risk
+  [result] 277              1           0.999988   99.998787     High Risk
+  [result] 408              1           0.999987   99.998711     High Risk
+  [result] 354              1           0.999987   99.998688     High Risk
+  [result] 1649             1           0.999986   99.998604     High Risk
+  [result] 938              1           0.999985   99.998451     High Risk
+  [result] 1092             1           0.999983   99.998344     High Risk
+  [result] 1324             1           0.999983   99.998260     High Risk
+  [result] 1338             1           0.999981   99.998093     High Risk
+
+--- [Cell 63] (code) ---
+Source:
+  feature_importance = pd.DataFrame({
+      'Feature': X.columns,
+      'Importance': xgb.feature_importances_
+  })
+  
+  feature_importance.head()
+
+Output:
+  [result]                                    Feature  Importance
+  [result] 0                 Avg min between sent tnx    0.003024
+  [result] 1             Avg min between received tnx    0.003052
+  [result] 2  Time Diff between first and last (Mins)    0.029083
+  [result] 3                                 Sent tnx    0.004167
+  [result] 4                             Received Tnx    0.013736
+
+--- [Cell 64] (code) ---
+Source:
+  feature_importance = feature_importance.sort_values(
+      by='Importance',
+      ascending=False
+  )
+  
+  feature_importance.head(20)
+
+Output:
+  [result]                                               Feature  Importance
+  [result] 45                         ERC20 most sent token type    0.316932
+  [result] 46                          ERC20_most_rec_token_type    0.268753
+  [result] 22                                   Total ERC20 tnxs    0.186467
+  [result] 24                             ERC20 total ether sent    0.035860
+  [result] 2             Time Diff between first and last (Mins)    0.029083
+  [result] 39                                 ERC20 avg val sent    0.016623
+  [result] 43                         ERC20 uniq sent token name    0.016157
+  [result] 4                                        Received Tnx    0.013736
+  [result] 17  total transactions (including tnx to create co...    0.012552
+  [result] 6                      Unique Received From Addresses    0.012046
+  [result] 27                                ERC20 uniq rec addr    0.011814
+  [result] 10                                   avg val received    0.008498
+  [result] 35                                  ERC20 max val rec    0.006276
+  [result] 19                               total ether received    0.006200
+  [result] 37                                 ERC20 min val sent    0.005979
+  [result] 44                          ERC20 uniq rec token name    0.005948
+  [result] 18                                   total Ether sent    0.004776
+  [result] 36                                  ERC20 avg val rec    0.004259
+  [result] 3                                            Sent tnx    0.004167
+  [result] 9                                 max value received     0.004070
+
+--- [Cell 65] (code) ---
+Source:
+  top10 = feature_importance.head(10)
+  
+  top10
+
+Output:
+  [result]                                               Feature  Importance
+  [result] 45                         ERC20 most sent token type    0.316932
+  [result] 46                          ERC20_most_rec_token_type    0.268753
+  [result] 22                                   Total ERC20 tnxs    0.186467
+  [result] 24                             ERC20 total ether sent    0.035860
+  [result] 2             Time Diff between first and last (Mins)    0.029083
+  [result] 39                                 ERC20 avg val sent    0.016623
+  [result] 43                         ERC20 uniq sent token name    0.016157
+  [result] 4                                        Received Tnx    0.013736
+  [result] 17  total transactions (including tnx to create co...    0.012552
+  [result] 6                      Unique Received From Addresses    0.012046
+
+--- [Cell 66] (code) ---
+Source:
+  import matplotlib.pyplot as plt
+  import seaborn as sns
+  
+  plt.figure(figsize=(10,6))
+  
+  sns.barplot(
+      data=top10,
+      x='Importance',
+      y='Feature'
+  )
+  
+  plt.title("Top 10 Important Features for Fraud Detection")
+  
+  plt.show()
+
+Output:
+  [display] <Figure size 1000x600 with 1 Axes>
+
+--- [Cell 67] (code) ---
+Source:
+  top10['Contribution (%)'] = (
+      top10['Importance'] /
+      top10['Importance'].sum()
+  ) * 100
+  
+  top10
+
+Output:
+  [stdout] /tmp/ipykernel_3342/182513620.py:1: SettingWithCopyWarning: 
+  [stdout] A value is trying to be set on a copy of a slice from a DataFrame.
+  [stdout] Try using .loc[row_indexer,col_indexer] = value instead
+  [stdout] 
+  [stdout] See the caveats in the documentation: https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
+  [stdout]   top10['Contribution (%)'] = (
+  [result]                                               Feature  Importance  \
+  [result] 45                         ERC20 most sent token type    0.316932   
+  [result] 46                          ERC20_most_rec_token_type    0.268753   
+  [result] 22                                   Total ERC20 tnxs    0.186467   
+  [result] 24                             ERC20 total ether sent    0.035860   
+  [result] 2             Time Diff between first and last (Mins)    0.029083   
+  [result] 39                                 ERC20 avg val sent    0.016623   
+  [result] 43                         ERC20 uniq sent token name    0.016157   
+  [result] 4                                        Received Tnx    0.013736   
+  [result] 17  total transactions (including tnx to create co...    0.012552   
+  [result] 6                      Unique Received From Addresses    0.012046   
+  [result] 
+  [result]     Contribution (%)  
+  [result] 45         34.896366  
+  [result] 46         29.591537  
+  [result] 22         20.531263  
+  [result] 24          3.948446  
+  [result] 2           3.202213  
+  [result] 39          1.830278  
+  [result] 43          1.778989  
+  [result] 4           1.512478  
+  [result] 17          1.382088  
+  [result] 6           1.326336  
+
+--- [Cell 68] (code) ---
+Source:
+  top10.to_csv(
+      'top10_feature_importance.csv',
+      index=False
+  )
+
+Output: (No output or in-place execution)
+
+--- [Cell 69] (code) ---
+Source:
+  top10.to_csv(
+      'top10_feature_importance.csv',
+      index=False
+  )
+
+Output: (No output or in-place execution)
+
+--- [Cell 70] (code) ---
+Source:
+  feature_importance.head(20)
+
+Output:
+  [result]                                               Feature  Importance
+  [result] 45                         ERC20 most sent token type    0.316932
+  [result] 46                          ERC20_most_rec_token_type    0.268753
+  [result] 22                                   Total ERC20 tnxs    0.186467
+  [result] 24                             ERC20 total ether sent    0.035860
+  [result] 2             Time Diff between first and last (Mins)    0.029083
+  [result] 39                                 ERC20 avg val sent    0.016623
+  [result] 43                         ERC20 uniq sent token name    0.016157
+  [result] 4                                        Received Tnx    0.013736
+  [result] 17  total transactions (including tnx to create co...    0.012552
+  [result] 6                      Unique Received From Addresses    0.012046
+  [result] 27                                ERC20 uniq rec addr    0.011814
+  [result] 10                                   avg val received    0.008498
+  [result] 35                                  ERC20 max val rec    0.006276
+  [result] 19                               total ether received    0.006200
+  [result] 37                                 ERC20 min val sent    0.005979
+  [result] 44                          ERC20 uniq rec token name    0.005948
+  [result] 18                                   total Ether sent    0.004776
+  [result] 36                                  ERC20 avg val rec    0.004259
+  [result] 3                                            Sent tnx    0.004167
+  [result] 9                                 max value received     0.004070
+
+--- [Cell 71] (code) ---
+Source:
+  top10 = top10.copy()
+  
+  top10['Contribution (%)'] = (
+      top10['Importance'] /
+      top10['Importance'].sum()
+  ) * 100
+
+Output: (No output or in-place execution)

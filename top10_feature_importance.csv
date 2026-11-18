@@ -1,0 +1,11 @@
+Feature,Importance,Contribution (%)
+ ERC20 most sent token type,0.316932,34.896366
+ ERC20_most_rec_token_type,0.268753,29.591537
+ Total ERC20 tnxs,0.186467,20.531263
+ ERC20 total ether sent,0.03586,3.948446
+Time Diff between first and last (Mins),0.029083,3.202213
+ ERC20 avg val sent,0.016623,1.830278
+ ERC20 uniq sent token name,0.016157,1.778989
+Received Tnx,0.013736,1.512478
+total transactions (including tnx to create contracts),0.012552,1.382088
+Unique Received From Addresses,0.012046,1.326336
